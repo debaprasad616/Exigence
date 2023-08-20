@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sms/flutter_sms.dart';
+import 'package:permission_handler/permission_handler.dart';
 // import 'package:flutter_sms/flutter_sms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,16 +34,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  // void _sendSMS() async {
-  //   List<String> recipients = ['7008786967'];
-  //   String message = 'Hi';
-  //
-  //   await sendSMS(message: message, recipients: recipients)
-  //       .catchError((onError) {
-  //     // Handle sending failure
-  //     print('Failed to send SMS: $onError');
-  //   });
-  // }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +56,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             const SizedBox(height: 20),
             Button(onPressed: _saveContacts, buttonText: 'Register'),
-            const SizedBox(height: 20),
-            // Button(onPressed: _sendSMS, buttonText: 'Send'),
           ],
         ),
       ),

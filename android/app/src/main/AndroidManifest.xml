@@ -1,5 +1,17 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.exigence.exigence_v6">
+
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="smsto"/>
+        </intent>
+    </queries>
+
     <application
+
         android:label="exigence_v6"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -30,4 +42,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
 </manifest>

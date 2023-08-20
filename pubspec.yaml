@@ -34,8 +34,10 @@ dependencies:
   google_maps_flutter: ^2.2.6
   sensors: any
   fluttertoast: ^8.0.8
-  flutter_sms: any
-  permission_handler : any
+  permission_handler: any
+  telephony: ^0.2.0
+  flutter_sms:
+    path: C:\DRIVE DEBA\PROJECTS\Flutter Projects\flutter_sms-master
 
 
   # The following adds the Cupertino Icons font to your application.
