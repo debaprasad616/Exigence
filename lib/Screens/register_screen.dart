@@ -1,5 +1,5 @@
 import 'package:exigence_v6/Screens/home_screen.dart';
-import 'package:exigence_v6/Widgets/emergencyContact_widget.dart';
+import 'package:exigence_v6/Widgets/emergencyContactField_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Widgets/button_widget.dart';

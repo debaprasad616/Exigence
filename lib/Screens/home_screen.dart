@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:exigence_v6/Actions/shake_detector.dart';
 import 'package:exigence_v6/Actions/sms_sender.dart';
 
+import '../Widgets/quickCall_widget.dart';
+
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -17,18 +19,29 @@ class HomeScreen extends StatelessWidget {
     shakeDetector.startListening();
 
     return Scaffold(
-      backgroundColor: Colors.white, // Set background color to white
+      backgroundColor: Colors.white,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            flex: 2,
+            flex: 1,
             child: MapWidget(),
           ),
           Expanded(
-            flex: 3,
-            child: Container(
-
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // Display three widgets in a row
+                  mainAxisSpacing: 8, // Adjust spacing between rows
+                  crossAxisSpacing: 8, // Adjust spacing between columns
+                ),
+                itemCount: 3, // Display three widgets
+                itemBuilder: (context, index) {
+                  return QuickCallWidget(phoneNumber: "7008786967");
+                },
+              ),
             ),
           ),
         ],
@@ -36,5 +49,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
