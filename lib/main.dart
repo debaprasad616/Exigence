@@ -18,6 +18,8 @@ class MyApp extends StatelessWidget {
       title: 'App Title',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'Roboto', // Use a consistent font family
       ),
       home: AppStart(),
     );
@@ -47,8 +49,11 @@ class _AppStartState extends State<AppStart> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return RegistrationScreen();
+    return _isRegistered ? HomeScreen() : RegistrationScreen();
+    // return RegistrationScreen();
   }
+
 }

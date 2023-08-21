@@ -1,11 +1,8 @@
+import 'package:exigence_v6/Screens/home_screen.dart';
+import 'package:exigence_v6/Widgets/emergencyContact_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sms/flutter_sms.dart';
-import 'package:permission_handler/permission_handler.dart';
-// import 'package:flutter_sms/flutter_sms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../Widgets/button_widget.dart';
-import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   @override
@@ -15,6 +12,7 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController _contact1Controller = TextEditingController();
   TextEditingController _contact2Controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // Add a GlobalKey for the form
 
   @override
   void dispose() {
@@ -23,40 +21,64 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
-  void _saveContacts() async {
+  Future<String> _getContact(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('contact1', _contact1Controller.text);
-    prefs.setString('contact2', _contact2Controller.text);
-    prefs.setBool('registered', true); // Set registered status to true
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
-    );
+    return prefs.getString(key) ?? '';
   }
 
+  bool isValidPhoneNumber(String input) {
+    final RegExp phoneRegExp = RegExp(r'^\d{10}$'); // Assumes a 10-digit phone number
+    return phoneRegExp.hasMatch(input);
+  }
+
+  void _saveContacts() async {
+    if (_formKey.currentState!.validate()) {
+      final contact1 = _contact1Controller.text;
+      final contact2 = _contact2Controller.text;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('contact1', contact1);
+      await prefs.setString('contact2', contact2);
+      await prefs.setBool('registered', true); // Mark as registered
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    }
+  }
 
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registration')),
+      backgroundColor: Color(0xFFEFEFEF),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _contact1Controller,
-              decoration: InputDecoration(labelText: 'Emergency Contact 1'),
-            ),
-            TextField(
-              controller: _contact2Controller,
-              decoration: InputDecoration(labelText: 'Emergency Contact 2'),
-            ),
-            const SizedBox(height: 20),
-            Button(onPressed: _saveContacts, buttonText: 'Register'),
-          ],
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Registration',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 30),
+              EmergencyContactField(controller: _contact1Controller, labelText: 'Emergency Contact 1'),
+              SizedBox(height: 20),
+              EmergencyContactField(controller: _contact2Controller, labelText: 'Emergency Contact 2'),
+              SizedBox(height: 30),
+              Button(
+                onPressed: _saveContacts,
+                buttonText: 'Register',
+              ),
+            ],
+          ),
         ),
       ),
     );
