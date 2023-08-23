@@ -1,14 +1,17 @@
 
 
+import 'package:exigence_v6/Screens/cameraScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Actions/flutterBackgroundServices.dart';
 import 'Screens/home_screen.dart';
 import 'Screens/register_screen.dart';
 
 
-void main() {
+void main() async{
   runApp(MyApp());
+  // await initializeService();
 }
 
 class MyApp extends StatelessWidget {
