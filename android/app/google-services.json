@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "176585821704",
+    "project_id": "exigency-93ab9",
+    "storage_bucket": "exigency-93ab9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:176585821704:android:0f590d4f8f17bff3f74bbd",
+        "android_client_info": {
+          "package_name": "com.exigence.exigence_v6"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1PCSNO-dYHWDIK1cKtOYe2g9_qYD3MLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

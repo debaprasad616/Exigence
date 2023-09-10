@@ -1,6 +1,5 @@
 
 
-import 'package:exigence_v6/Screens/cameraScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

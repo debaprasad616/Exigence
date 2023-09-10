@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:exigence_v6/Widgets/map_widget.dart';
-import 'package:exigence_v6/Widgets/quickCall_widget.dart';
+import 'package:camera/camera.dart';
+import '../Widgets/quickCall_widget.dart';
+import '../Widgets/camera_widget.dart';
+import '../Widgets/map_widget.dart';
 import 'package:exigence_v6/Actions/shake_detector.dart';
 import 'package:exigence_v6/Actions/sms_sender.dart';
-import 'package:camera/camera.dart';
 import 'package:exigence_v6/Actions/AutoPhotoCapture.dart';
+import '../Actions/email_sender.dart';
 
-import '../Actions/email_sender.dart'; // Import the PhotoCapture class
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.white,
+        hintColor: Colors.blue,
+        fontFamily: 'Roboto',
+      ),
+      home: HomeScreen(),
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
+
 class _HomeScreenState extends State<HomeScreen> {
   late CameraController _cameraController;
   ShakeDetector? _shakeDetector;
@@ -61,10 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
-
-
-
   @override
   void dispose() {
     _cameraController.dispose();
@@ -73,17 +88,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<QuickCallData> quickCallDataList = [
+      QuickCallData(phoneNumber: "111", imageAsset: 'assets/images_call/ambulance.png'),
+      QuickCallData(phoneNumber: "333", imageAsset: 'assets/images_call/fireBrigade.png'),
+      QuickCallData(phoneNumber: "444", imageAsset: 'assets/images_call/police.png'),
+      QuickCallData(phoneNumber: "222", imageAsset: 'assets/images_call/childhelpline.png'),
+      QuickCallData(phoneNumber: "555", imageAsset: 'assets/images_call/seniorcitizenhelpline.png'),
+      QuickCallData(phoneNumber: "666", imageAsset: 'assets/images_call/womenhelpline.png'),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: MapWidget(),
           ),
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              "Quick Contacts",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: GridView.builder(
@@ -92,19 +128,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
                 ),
-                itemCount: 3,
+                itemCount: quickCallDataList.length,
                 itemBuilder: (context, index) {
-                  return QuickCallWidget(phoneNumber: "7008786967");
+                  return GestureDetector(
+                    child: QuickCallWidget(
+                      phoneNumber: quickCallDataList[index].phoneNumber,
+                      imageAsset: quickCallDataList[index].imageAsset,
+                    ),
+                  );
                 },
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(),
           ),
         ],
       ),
     );
   }
+}
+
+class QuickCallData {
+  final String phoneNumber;
+  final String imageAsset;
+
+  QuickCallData({required this.phoneNumber, required this.imageAsset});
 }

@@ -3,50 +3,16 @@ import 'package:exigence_v6/Widgets/emergencyContactField_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Widgets/button_widget.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
-}
-
-class RegistrationScreen extends StatefulWidget {
+class RegistrationScreenF extends StatefulWidget {
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends State<RegistrationScreenF> {
   TextEditingController _contact1Controller = TextEditingController();
   TextEditingController _contact2Controller = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Add a GlobalKey for the form
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-
-  Future<User?> _signInWithGoogle() async {
-    try {
-
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
-      final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount!.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.accessToken,
-        idToken: googleSignInAuthentication.idToken,
-      );
-
-      final UserCredential authResult = await _auth.signInWithCredential(credential);
-      final User? user = authResult.user;
-
-      return user;
-    } catch (error) {
-      print(error);
-      return null;
-    }
-  }
 
   @override
   void dispose() {
@@ -110,11 +76,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Button(
                 onPressed: _saveContacts,
                 buttonText: 'Register',
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _signInWithGoogle,
-                child: Text('Sign in with Google'),
               ),
             ],
           ),
