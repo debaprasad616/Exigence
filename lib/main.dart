@@ -1,5 +1,6 @@
 
 
+import 'package:exigence_v6/Screens/register_ScreenF.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,7 +55,7 @@ class _AppStartState extends State<AppStart> {
 
   @override
   Widget build(BuildContext context) {
-    return _isRegistered ? HomeScreen() : RegistrationScreen();
+    return _isRegistered ? HomeScreen() : RegistrationScreenF();
     // return RegistrationScreen();
   }
 
