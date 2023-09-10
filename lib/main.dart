@@ -1,5 +1,6 @@
 
 
+import 'package:exigence_v6/Screens/Try_Screen.dart';
 import 'package:exigence_v6/Screens/register_ScreenF.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,11 +8,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Actions/flutterBackgroundServices.dart';
 import 'Screens/home_screen.dart';
 import 'Screens/register_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
-void main() async{
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
-  // await initializeService();
 }
 
 class MyApp extends StatelessWidget {
@@ -55,7 +61,7 @@ class _AppStartState extends State<AppStart> {
 
   @override
   Widget build(BuildContext context) {
-    return _isRegistered ? HomeScreen() : RegistrationScreenF();
+    return _isRegistered ? HomeScreen() : MessageInputScreen();
     // return RegistrationScreen();
   }
 
