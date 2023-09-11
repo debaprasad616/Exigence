@@ -1,5 +1,6 @@
 
 
+import 'package:exigence_v6/Screens/OnBoardingScreen.dart';
 import 'package:exigence_v6/Screens/Try_Screen.dart';
 import 'package:exigence_v6/Screens/register_ScreenF.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'Screens/register_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'Screens/splashScreen.dart';
 
 
 
@@ -24,13 +27,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'App Title',
+      title: 'Your App Title',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily: 'Roboto', // Use a consistent font family
       ),
-      home: AppStart(),
+      // Use a Future.delayed to display the SplashScreen for a few seconds.
+      home: FutureBuilder(
+        future: Future.delayed(Duration(seconds: 3), () => true), // Adjust the duration as needed
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return SplashScreen(); // Show the SplashScreen while waiting
+          } else {
+            return HomeScreen(); // Navigate to your main screen
+          }
+        },
+      ),
     );
   }
 }
@@ -61,7 +73,7 @@ class _AppStartState extends State<AppStart> {
 
   @override
   Widget build(BuildContext context) {
-    return _isRegistered ? HomeScreen() : MessageInputScreen();
+    return _isRegistered ? HomeScreen() : OnboardingScreen();
     // return RegistrationScreen();
   }
 

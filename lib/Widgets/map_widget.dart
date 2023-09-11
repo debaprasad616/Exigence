@@ -100,6 +100,31 @@ class _MapWidgetState extends State<MapWidget> {
             ),
             Positioned(
               bottom: 16,
+              left: 16,
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  _address ?? 'Unknown Location',
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 16,
               right: 16,
               child: Column(
                 children: [
@@ -149,7 +174,6 @@ class _MapWidgetState extends State<MapWidget> {
                 ],
               ),
             ),
-            Container(child: Text("current location //hey chat gpt add current location "),)
           ],
         ),
       ),

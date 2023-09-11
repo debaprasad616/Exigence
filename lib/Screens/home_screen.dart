@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../Widgets/quickCall_widget.dart';
 import '../Widgets/camera_widget.dart';
 import '../Widgets/map_widget.dart';
 import 'package:exigence_v6/Actions/shake_detector.dart';
 import 'package:exigence_v6/Actions/sms_sender.dart';
 import 'package:exigence_v6/Actions/AutoPhotoCapture.dart';
-import '../Actions/email_sender.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -45,6 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<String> shortenUrl(String longUrl) async {
+    final response = await http.get(Uri.parse('http://tinyurl.com/api-create.php?url=$longUrl'));
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Failed to shorten URL');
+    }
+  }
+
+
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
     _cameraController = CameraController(cameras[0], ResolutionPreset.medium);
@@ -61,24 +76,42 @@ class _HomeScreenState extends State<HomeScreen> {
     _shakeDetector!.startListening();
   }
 
+
+  Future<Position> _getCurrentLocation() async {
+    final permissionStatus = await Permission.location.request();
+
+    if (permissionStatus.isGranted) {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      return position;
+    } else {
+      print("Location permission denied");
+      throw Exception('Location permission denied');
+    }
+  }
+
+
+
   void _capturePhotoAndSendSMSAndEmail() async {
     if (_cameraController == null || !_cameraController.value.isInitialized) {
       return;
     }
 
-    final photoPath = await _photoCapture.captureAndSavePhoto();
-    final smsSender = SmsSender();
-    smsSender.sendSMS("Hey, are you there? I've captured a photo.");
-    print('SMS sent!');
+    final photoUrl = await _photoCapture.captureAndSavePhoto(); // Capture and get the photo URL
+    final shortenedUrl = await shortenUrl(photoUrl!); // Shorten the URL
 
-    final emailSender = EmailSender();
-    try {
-      await emailSender.sendEmailWithAttachment(photoPath);
-      print('Email sent with attachment!');
-    } catch (e) {
-      print('Failed to send email: $e');
-    }
+    final position = await _getCurrentLocation(); // Get the current location
+    final locationMessage = "My current location is: https://www.google.com/maps?q=${position.latitude},${position.longitude}";
+
+    final smsSender = SmsSender();
+    smsSender.sendSMS(locationMessage); // Send the current location as an SMS message
+    smsSender.sendSMS("Checkout this recent Auto captured Photo: $shortenedUrl"); // Include the shortened URL in the SMS message
+    print('SMS sent with shortened URL: $shortenedUrl');
   }
+
+
+
 
   @override
   void dispose() {

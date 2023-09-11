@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageInputScreen extends StatefulWidget {
   @override
@@ -12,15 +12,13 @@ class _MessageInputScreenState extends State<MessageInputScreen> {
 
   void _saveMessage() {
     final message = _messageController.text;
-    final databaseReference = FirebaseDatabase.instance.reference().child('messages');
+    final firestoreInstance = FirebaseFirestore.instance;
 
-    // Push a new message with a unique key
-    databaseReference.push().set({
+    firestoreInstance.collection('messages').add({
       'text': message,
-      'timestamp': ServerValue.timestamp, // Include a timestamp if needed
     }).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Message saved to Firebase'),
+        content: Text('Message saved to Firestore'),
       ));
       _messageController.clear(); // Clear the text field
     }).catchError((error) {
@@ -29,6 +27,8 @@ class _MessageInputScreenState extends State<MessageInputScreen> {
       ));
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
