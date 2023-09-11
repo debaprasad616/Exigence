@@ -24,6 +24,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  bool _isRegistered = false;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return SplashScreen(); // Show the SplashScreen while waiting
           } else {
-            return HomeScreen(); // Navigate to your main screen
+            return _isRegistered ? HomeScreen() : OnboardingScreen(); // Navigate to your main screen
           }
         },
       ),
