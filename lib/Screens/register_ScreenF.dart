@@ -10,14 +10,18 @@ class RegistrationScreenF extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreenF> {
-  TextEditingController _contact1Controller = TextEditingController();
-  TextEditingController _contact2Controller = TextEditingController();
+  List<TextEditingController> contactControllers = [
+    TextEditingController(),
+    TextEditingController(),
+  ];
+
   final _formKey = GlobalKey<FormState>(); // Add a GlobalKey for the form
 
   @override
   void dispose() {
-    _contact1Controller.dispose();
-    _contact2Controller.dispose();
+    for (var controller in contactControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -26,6 +30,7 @@ class _RegistrationScreenState extends State<RegistrationScreenF> {
     return prefs.getString(key) ?? '';
   }
 
+
   bool isValidPhoneNumber(String input) {
     final RegExp phoneRegExp = RegExp(r'^\d{10}$'); // Assumes a 10-digit phone number
     return phoneRegExp.hasMatch(input);
@@ -33,12 +38,10 @@ class _RegistrationScreenState extends State<RegistrationScreenF> {
 
   void _saveContacts() async {
     if (_formKey.currentState!.validate()) {
-      final contact1 = _contact1Controller.text;
-      final contact2 = _contact2Controller.text;
-
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('contact1', contact1);
-      await prefs.setString('contact2', contact2);
+      for (var i = 0; i < contactControllers.length; i++) {
+        await prefs.setString('contact${i + 1}', contactControllers[i].text);
+      }
       await prefs.setBool('registered', true); // Mark as registered
 
       Navigator.of(context).pushReplacement(
@@ -47,7 +50,19 @@ class _RegistrationScreenState extends State<RegistrationScreenF> {
     }
   }
 
+  void _addContactField() {
+    setState(() {
+      contactControllers.add(TextEditingController());
+    });
+  }
 
+  void _deleteContactField(int index) {
+    if (index >= 2) {
+      setState(() {
+        contactControllers.removeAt(index);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +84,31 @@ class _RegistrationScreenState extends State<RegistrationScreenF> {
                 ),
               ),
               SizedBox(height: 30),
-              EmergencyContactField(controller: _contact1Controller, labelText: 'Emergency Contact 1'),
+              for (var i = 0; i < contactControllers.length; i++)
+                Container(
+                  height: 50, // Set a fixed height for the contact field
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: EmergencyContactField(
+                          controller: contactControllers[i],
+                          labelText: 'Emergency Contact ${i + 1}',
+                        ),
+                      ),
+                      if (i >= 2) // Show delete icon only for user-created fields
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => _deleteContactField(i),
+                        ),
+                    ],
+                  ),
+                ),
               SizedBox(height: 20),
-              EmergencyContactField(controller: _contact2Controller, labelText: 'Emergency Contact 2'),
+              ElevatedButton.icon(
+                onPressed: _addContactField,
+                icon: Icon(Icons.add),
+                label: Text('Add Emergency Contact'),
+              ),
               SizedBox(height: 30),
               Button(
                 onPressed: _saveContacts,

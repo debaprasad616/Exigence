@@ -3,6 +3,7 @@ import 'package:exigence_v6/Actions/AutoAudioRecord.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../Actions/ULRshorten.dart';
@@ -12,6 +13,7 @@ import '../Widgets/map_widget.dart';
 import 'package:exigence_v6/Actions/shake_detector.dart';
 import 'package:exigence_v6/Actions/sms_sender.dart';
 import 'package:exigence_v6/Actions/AutoPhotoCapture.dart';
+
 
 
 
@@ -120,6 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
+
+
   Future<void> _sendSMS() async {
     try {
       final smsSender = SmsSender();
@@ -130,20 +134,36 @@ class _HomeScreenState extends State<HomeScreen> {
           "Check out my location and reach here as soon as possible: https://www.google.com/maps?q=${Uri.encodeComponent(position.latitude.toString())},${Uri.encodeComponent(position.longitude.toString())}";
 
       smsSender.sendSMS(locationMessage);
+      showToast('Location sent');
 
       // Photo
       final photoUrl = await _photoCapture.captureAndSavePhoto();
       final shortenedPhotoUrl = await shortenUrl(photoUrl!);
       smsSender.sendSMS("I am in big trouble! here is an Auto-captured Photo: $shortenedPhotoUrl");
+      showToast('Image sent');
 
       // Audio
       final audioUrl = await _audioRecorder.startRecordingAndSaveToFirebase();
       final shortenedAudioUrl = await shortenUrl(audioUrl!);
       smsSender.sendSMS("Surrounding sound record: $shortenedAudioUrl");
+      showToast('Audio sent');
     } catch (e) {
       print('Error during SMS sending: $e');
+      showToast('Error during SMS sending: $e', isError: true);
     }
   }
+
+  void showToast(String message, {bool isError = false}) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: isError ? Colors.red : Colors.green,
+      textColor: Colors.white,
+    );
+  }
+
 
 
 

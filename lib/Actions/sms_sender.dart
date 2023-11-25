@@ -1,34 +1,31 @@
-import 'package:flutter/material.dart';
 import 'package:telephony/telephony.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart'; // Import the fluttertoast package
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SmsSender {
   final Telephony telephony = Telephony.instance;
 
   Future<void> sendSMS(String message) async {
-    String contact1 = await _getContact('contact1');
-    String contact2 = await _getContact('contact2');
+    List<String> contacts = [
+      await _getContact('contact1'),
+      await _getContact('contact2'),
+      // Add more contacts as needed
+    ];
 
     bool smsSent = false;
 
-    if (contact1.isNotEmpty) {
-      smsSent = await _sendSms(contact1, message);
-    }
-
-    if (contact2.isNotEmpty && !smsSent) {
-      smsSent = await _sendSms(contact2, message);
-    }
-
-    _showToast(smsSent);
-  }
-
-  Future<bool> _sendSms(String recipient, String message) async {
-    try {
-      await telephony.sendSms(to: recipient, message: message);
-      return true;
-    } catch (e) {
-      return false;
+    for (String contact in contacts) {
+      if (contact.isNotEmpty) {
+        try {
+          await telephony.sendSms(to: contact, message: message);
+          smsSent = true;
+          // Break the loop if SMS is sent successfully to any contact
+          break;
+        } catch (e) {
+          print('Error sending SMS to $contact: $e');
+          smsSent = false;
+        }
+      }
     }
   }
 
@@ -37,21 +34,4 @@ class SmsSender {
     return prefs.getString(key) ?? '';
   }
 
-  void _showToast(bool smsSent) {
-    if (smsSent) {
-      Fluttertoast.showToast(
-        msg: 'SMS sent successfully!',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-      );
-    } else {
-      Fluttertoast.showToast(
-        msg: 'Failed to send SMS.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-      );
-    }
-  }
 }

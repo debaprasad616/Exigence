@@ -9,32 +9,23 @@ class CountdownScreen extends StatefulWidget {
   _CountdownScreenState createState() => _CountdownScreenState();
 }
 
-
 class _CountdownScreenState extends State<CountdownScreen> with SingleTickerProviderStateMixin {
-  int countdown = 555555;
-  late AnimationController _linearAnimationController;
-
-  late Animation<double> _linearAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_linearAnimationController);
-
+  int countdown = 5;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-
-    _linearAnimationController = AnimationController(
+    _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: countdown),
-    );
+    )..forward();
 
-    _linearAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_linearAnimationController);
-
-    _linearAnimationController.addStatusListener((status) {
+    _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         widget.onCountdownFinish();
       }
     });
-
-    _linearAnimationController.forward();
 
     startCountdown();
   }
@@ -45,7 +36,7 @@ class _CountdownScreenState extends State<CountdownScreen> with SingleTickerProv
         setState(() {
           countdown--;
         });
-        _linearAnimationController.forward(from: 0); // Restart linear animation for each second
+        _animationController.forward(from: 0); // Restart animation for each second
         startCountdown();
       }
     });
@@ -53,6 +44,8 @@ class _CountdownScreenState extends State<CountdownScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    double progress = _animationController.value;
+
     return WillPopScope(
       onWillPop: () async {
         _cancelCountdown();
@@ -63,20 +56,22 @@ class _CountdownScreenState extends State<CountdownScreen> with SingleTickerProv
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              RotationTransition(
-                turns: _linearAnimation,
+              SizedBox(
+                width: 150,
+                height: 150,
                 child: CircularProgressIndicator(
+                  value: progress,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                 ),
               ),
               SizedBox(height: 16),
-              AnimatedTextCountdown(
-                value: countdown,
-                duration: Duration(seconds: 1),
+              Text(
+                '$countdown',
+                style: TextStyle(fontSize: 40),
               ),
               SizedBox(height: 16),
               Text(
-                'Press "Cancel" to send your location, photo, and audio to your friend or family.',
+                'Press "Cancel" to cancle sending your location, photo, and audio to your friends or family.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
@@ -101,28 +96,7 @@ class _CountdownScreenState extends State<CountdownScreen> with SingleTickerProv
 
   @override
   void dispose() {
-    _linearAnimationController.dispose();
+    _animationController.dispose();
     super.dispose();
-  }
-}
-
-class AnimatedTextCountdown extends StatelessWidget {
-  final int value;
-  final Duration duration;
-
-  AnimatedTextCountdown({required this.value, required this.duration});
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<int>(
-      tween: IntTween(begin: value + 1, end: value),
-      duration: duration,
-      builder: (context, value, child) {
-        return Text(
-          'Sending in $value seconds',
-          style: TextStyle(fontSize: 20),
-        );
-      },
-    );
   }
 }
