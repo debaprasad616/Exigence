@@ -23,3 +23,19 @@ class ShakeDetector {
   }
 
 }
+
+class ShakeHandler {
+  ShakeDetector? _shakeDetector;
+
+  ShakeHandler({
+    required Function() onShake,
+  }) {
+    _shakeDetector = ShakeDetector(
+      onShake: () async {
+        onShake();
+        print('Shaking detected!');
+      },
+    );
+    _shakeDetector!.startListening();
+  }
+}

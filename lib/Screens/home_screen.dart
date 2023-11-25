@@ -1,21 +1,20 @@
+
+import 'package:exigence_v6/Actions/AutoAudioRecord.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../Actions/ULRshorten.dart';
+import '../Actions/countdown.dart';
 import '../Widgets/quickCall_widget.dart';
-import '../Widgets/camera_widget.dart';
 import '../Widgets/map_widget.dart';
 import 'package:exigence_v6/Actions/shake_detector.dart';
 import 'package:exigence_v6/Actions/sms_sender.dart';
 import 'package:exigence_v6/Actions/AutoPhotoCapture.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
 
 
-void main() {
-  runApp(MyApp());
-}
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,9 +36,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late CameraController _cameraController;
   ShakeDetector? _shakeDetector;
+
+  late CameraController _cameraController;
   late PhotoCapture _photoCapture;
+  late ShakeHandler _shakeHandler;
+  late AudioRecorder _audioRecorder;
 
   @override
   void initState() {
@@ -47,35 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _initializeCamera().then((_) {
       _initializeShakeDetector();
       _photoCapture = PhotoCapture(_cameraController);
+      _audioRecorder = AudioRecorder();
     });
   }
-
-  Future<String> shortenUrl(String longUrl) async {
-    final response = await http.get(Uri.parse('http://tinyurl.com/api-create.php?url=$longUrl'));
-    if (response.statusCode == 200) {
-      return response.body;
-    } else {
-      throw Exception('Failed to shorten URL');
-    }
-  }
-
-
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    _cameraController = CameraController(cameras[0], ResolutionPreset.medium);
-    await _cameraController.initialize();
-  }
-
-  void _initializeShakeDetector() {
-    _shakeDetector = ShakeDetector(
-      onShake: () async {
-        _capturePhotoAndSendSMSAndEmail();
-        print('Shaking detected!');
-      },
-    );
-    _shakeDetector!.startListening();
-  }
-
 
   Future<Position> _getCurrentLocation() async {
     final permissionStatus = await Permission.location.request();
@@ -91,24 +67,89 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
-
-  void _capturePhotoAndSendSMSAndEmail() async {
-    if (_cameraController == null || !_cameraController.value.isInitialized) {
-      return;
-    }
-
-    final photoUrl = await _photoCapture.captureAndSavePhoto(); // Capture and get the photo URL
-    final shortenedUrl = await shortenUrl(photoUrl!); // Shorten the URL
-
-    final position = await _getCurrentLocation(); // Get the current location
-    final locationMessage = "My current location is: https://www.google.com/maps?q=${position.latitude},${position.longitude}";
-
-    final smsSender = SmsSender();
-    smsSender.sendSMS(locationMessage); // Send the current location as an SMS message
-    smsSender.sendSMS("Checkout this recent Auto captured Photo: $shortenedUrl"); // Include the shortened URL in the SMS message
-    print('SMS sent with shortened URL: $shortenedUrl');
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    _cameraController = CameraController(cameras[0], ResolutionPreset.medium);
+    await _cameraController.initialize();
   }
+
+  void _handleSendButtonClick() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CountdownScreen(
+          onCountdownFinish: () async {
+            Navigator.pop(context); // Pop the countdown screen
+            await _sendSMS(); // Send SMS after countdown
+          },
+        ),
+      ),
+    );
+  }
+
+  void _initializeShakeDetector() {
+    bool isShakeEnabled = true;
+
+    _shakeHandler = ShakeHandler(
+      onShake: () async {
+        try {
+          if (isShakeEnabled) {
+            isShakeEnabled = false; // Disable shake detection temporarily
+
+            // Create an instance of AudioRecorder
+            _audioRecorder = AudioRecorder();
+
+            // Initialize microphone and start recording
+            await _audioRecorder.startRecordingAndSaveToFirebase();
+
+            // Capture and save a photo
+            await _photoCapture.captureAndSavePhoto();
+
+            _handleSendButtonClick();
+
+            // Enable shake detection after a cooldown period
+            Future.delayed(Duration(seconds: 15), () {
+              isShakeEnabled = true;
+            });
+          }
+        } catch (e) {
+          print('Error during shake detection: $e');
+        }
+      },
+    );
+  }
+
+
+  Future<void> _sendSMS() async {
+    try {
+      final smsSender = SmsSender();
+
+      // Location
+      final position = await _getCurrentLocation();
+      final locationMessage =
+          "Check out my location and reach here as soon as possible: https://www.google.com/maps?q=${Uri.encodeComponent(position.latitude.toString())},${Uri.encodeComponent(position.longitude.toString())}";
+
+      smsSender.sendSMS(locationMessage);
+
+      // Photo
+      final photoUrl = await _photoCapture.captureAndSavePhoto();
+      final shortenedPhotoUrl = await shortenUrl(photoUrl!);
+      smsSender.sendSMS("I am in big trouble! here is an Auto-captured Photo: $shortenedPhotoUrl");
+
+      // Audio
+      final audioUrl = await _audioRecorder.startRecordingAndSaveToFirebase();
+      final shortenedAudioUrl = await shortenUrl(audioUrl!);
+      smsSender.sendSMS("Surrounding sound record: $shortenedAudioUrl");
+    } catch (e) {
+      print('Error during SMS sending: $e');
+    }
+  }
+
+
+
+
+
+
 
 
 
@@ -118,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _cameraController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: MapWidget(),
           ),
           SizedBox(height: 16),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -150,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+
           SizedBox(height: 8),
           Expanded(
             flex: 2,

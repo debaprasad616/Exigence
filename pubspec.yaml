@@ -57,6 +57,8 @@ dependencies:
   firebase_storage: any
   http: ^0.13.3
   url_launcher: ^6.0.9
+  microphone: any
+  flutter_sound: any
 
 
 dev_dependencies:
